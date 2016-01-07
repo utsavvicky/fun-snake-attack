@@ -64,7 +64,7 @@ def move_right(cur_dir):
 	
 	if cur_dir != "LEFT":
 		follow()
-		snake1[0].x += snake1[0].width			
+		snake1[0].x += snake1[0].width	
 
 
 def move_left(cur_dir):
@@ -97,7 +97,7 @@ def draw():
 	screen.fill(BLACK)
 
 	for i in xrange(n_blocks):
-		pygame.draw.rect(screen,snake1[i].color,((snake1[i].x,snake1[i].y),(snake1[i].width,snake1[i].height)))
+		pygame.draw.rect(screen,snake1[i].color,(((snake1[i].x%(scr_width+5)),(snake1[i].y%(scr_height+5))),(snake1[i].width,snake1[i].height)))
 
 	eaten = snake1[0].x == food1.x and snake1[0].y == food1.y
 
@@ -138,16 +138,29 @@ def run():
 				if event.key == K_DOWN:
 					p_down=1
 					cur_dir = "DOWN"
+					p_left=0
+					p_right=0
+					p_up=0
 				elif event.key == K_UP:
 					p_up=1
 					cur_dir = "UP"
+					p_down=0
+					p_left=0
+					p_right=0
 				elif event.key == K_LEFT:
 					p_left=1
 					cur_dir = "LEFT"
+					p_right=0
+					p_up=0
+					p_down=0
 				elif event.key == K_RIGHT:
 					p_right=1
 					cur_dir = "RIGHT"
+					p_up=0
+					p_left=0
+					p_down=0
 
+			'''
 			if event.type == pygame.KEYUP:
 				if event.key == K_DOWN:
 					p_down=0
@@ -157,7 +170,7 @@ def run():
                                         p_left=0
                                 elif event.key == K_RIGHT:
                                         p_right=0
-
+			'''
 
 		if p_left:
 			move_left(cur_dir)
