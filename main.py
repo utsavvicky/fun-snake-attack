@@ -15,6 +15,7 @@ screen = pygame.display.set_mode((scr_width,scr_height))
 n_blocks = 1
 origin = [40,40]
 eaten = 1
+score = 0
 
 class pause_scr_item(pygame.font.Font):
         def __init__(self, text, font=None, font_size=48, font_color=(255, 255, 255), (pos_x, pos_y)=(0, 0)):
@@ -65,14 +66,27 @@ class food_block:
 snake = [snake_block() for _ in xrange(200)]
 food = food_block()
 
-# initializing the first n blocks of the snake at their position and the food's position
-def init_origin():
+# initializing for a new game
+def init():
+	global snake, food, eaten, score, FPS, n_blocks, origin
+
+	snake = [snake_block() for _ in xrange(200)]
+	food = food_block()
+
+	n_blocks = 1
+	score = 0
+
+	origin[0] += n_blocks*5
+
 	for i in xrange(n_blocks):
 		snake[i].x = origin[0] - (snake[i].width*i)
 		snake[i].y = origin[1]
+
 	place_food()
 	eaten = 0
 
+	FPS=13.0
+	
 
 # function to randomly place food
 def place_food():
@@ -122,10 +136,57 @@ def move_down(cur_dir):
                 snake[0].y = (snake[0].y+snake[0].height)%(scr_height+5)
 	else:	move_up(cur_dir)
 
+def game_over():
+	if n_blocks <=2 :	return
+	for i in xrange(1,n_blocks):
+		if snake[0].x == snake[i].x and snake[0].y == snake[i].y:
+			display_game_over_screen()
+			
+
+def display_game_over_screen():
+	gover_font = pygame.font.SysFont(None, 48)
+	other_font = pygame.font.SysFont(None, 40)
+
+	gameover = gover_font.render("Gameover!", True, (255,255,255))
+	scored = other_font.render("Score: %d"%score, True, (255,255,255))
+	play_again = other_font.render("Play Again?", True, (255,255,255))
+	quit = other_font.render("Quit", True, (255,255,255))
+
+	gameover_pos = [(scr_width / 2) - (gameover.get_rect().width / 2), (scr_height / 2) - (2*gameover.get_rect().height)]
+	scored_pos = [(scr_width / 2) - (scored.get_rect().width / 2), (scr_height / 2) - (scored.get_rect().height) + 2]
+	play_again_pos = [(scr_width / 2) - (play_again.get_rect().width / 2), (scr_height / 2) + 4]
+	quit_pos = [(scr_width / 2) - (quit.get_rect().width / 2), (scr_height / 2) + (quit.get_rect().height) + 6]
+
+	loop = True
+
+	while loop:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				pos = pygame.mouse.get_pos()
+
+				if pos[0] >= play_again_pos[0] and pos[0] <= play_again_pos[0] + play_again.get_rect().width and pos[1] >= play_again_pos[1] and pos[1] <= play_again_pos[1] + play_again.get_rect().height:	run()
+
+				if pos[0] >= quit_pos[0] and pos[0] <= quit_pos[0] + quit.get_rect().width and pos[1] >= quit_pos[1] and pos[1] <= quit_pos[1] + quit.get_rect().height:
+					pygame.quit()
+					sys.exit()
+		
+		screen.fill((0,0,0))
+
+		screen.blit(gameover, gameover_pos)
+		screen.blit(scored, scored_pos)
+		screen.blit(play_again, play_again_pos)
+		screen.blit(quit, quit_pos)
+
+		pygame.display.flip()
+
 
 def draw():
 
-	global eaten, n_blocks, FPS
+	global eaten, n_blocks, FPS, score
 
 	BLACK = [0,0,0]
 
@@ -143,6 +204,7 @@ def draw():
 		snake[n_blocks-1].x=snake[n_blocks-2].x			# adding new block when food is consumed at the last block position
 		snake[n_blocks-1].y=snake[n_blocks-2].y
 		FPS += 0.5						# increasing speed after every food consumption
+		score += 10
 
 	pygame.draw.rect(screen,food.color,((food.x, food.y), (food.width, food.height)))
 
@@ -215,11 +277,12 @@ def run():
 
 	main_loop = True
 
-	init_origin()
+	init()
 
 	while main_loop:
 
 		draw()
+		game_over()
 
 		for event in pygame.event.get():
 			if event.type ==pygame.QUIT:
