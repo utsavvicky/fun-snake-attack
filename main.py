@@ -16,6 +16,35 @@ n_blocks = 1
 origin = [40,40]
 eaten = 1
 
+class pause_scr_item(pygame.font.Font):
+        def __init__(self, text, font=None, font_size=48, font_color=(255, 255, 255), (pos_x, pos_y)=(0, 0)):
+                pygame.font.Font.__init__(self, font, font_size)
+                self.text = text
+                self.font_size = font_size
+                self.font_color = font_color
+                self.label = self.render(self.text, 1, self.font_color)
+                self.width = self.label.get_rect().width
+                self.height = self.label.get_rect().height
+                self.dimensions = (self.width, self.height)
+                self.pos_x = pos_x
+                self.pos_y = pos_y
+                self.position = pos_x, pos_y
+
+        def set_position(self, x, y):
+                self.position = (x, y)
+                self.pos_x = x
+                self.pos_y = y
+
+        def set_font_color(self, rgb_tuple):
+                self.font_color = rgb_tuple
+                self.label = self.render(self.text, 1, self.font_color)
+
+        def is_mouse_selection(self, (posx, posy)):
+                if (posx >= self.pos_x and posx <= self.pos_x + self.width) and (posy >= self.pos_y and posy <= self.pos_y + self.height):
+                        return True
+                return False
+
+
 class snake_block:
 	'Defines the snake'
 	color = (0,250,0)
@@ -121,6 +150,59 @@ def draw():
 
 	fpsClock.tick(FPS)
 
+# pause the game
+def pause():
+
+	loop = True
+
+	items_arr = ['Resume', 'Quit']
+
+	items = []
+
+	for index,item in enumerate(items_arr):
+		menu_item = pause_scr_item(item)
+
+		t_h = len(items_arr) * menu_item.height
+		pos_x = (scr_width / 2) - (menu_item.width / 2)
+
+		pos_y = (scr_height / 2) - (t_h / 2) + ((index * 2) + index * menu_item.height)
+
+		menu_item.set_position(pos_x, pos_y)
+		items.append(menu_item)
+
+	screen.fill([0,0,0])
+
+	while loop:
+		
+		pygame.time.Clock().tick(FPS)
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				pos = pygame.mouse.get_pos()
+				for item in items:
+					if item.is_mouse_selection(pos):
+						loop = False
+						if item.text == "Quit":
+							pygame.quit()
+							sys.exit()
+
+		screen.fill([0,0,0])
+		
+		for item in items:
+			if item.is_mouse_selection(pygame.mouse.get_pos()):
+				item.set_font_color((255,255,255))
+				item.set_bold(True)
+			else:	
+				item.set_font_color((255,255,255))
+				item.set_bold(False)
+
+			screen.blit(item.label, item.position)
+				
+		pygame.display.flip()		
 
 def run():
 	p_right = 0
@@ -131,9 +213,11 @@ def run():
 	cur_dir = "RIGHT"
 	prev_dir = ""
 
+	main_loop = True
+
 	init_origin()
 
-	while True:
+	while main_loop:
 
 		draw()
 
@@ -171,7 +255,8 @@ def run():
 					p_up=0
 					p_left=0
 					p_down=0
-				# TODO If ESC key is pressed, display pause screen
+				elif event.key == K_ESCAPE:
+					pause()
 		if p_left:
 			move_left(prev_dir)
 		elif p_right:
