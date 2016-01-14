@@ -1,4 +1,4 @@
-import pygame, sys, random
+import pygame,random,sys
 from pygame.locals import *
 
 pygame.init()
@@ -13,9 +13,13 @@ screen = pygame.display.set_mode((scr_width,scr_height))
 
 # initial state of the snake
 n_blocks = 1
+n_blocks1 = 1
 origin = [40,40]
+origin1 = [100,100]
 eaten = 1
+eaten1 = 1
 score = 0
+score1 = 0
 
 class pause_scr_item(pygame.font.Font):
         def __init__(self, text, font=None, font_size=48, font_color=(255, 255, 255), (pos_x, pos_y)=(0, 0)):
@@ -48,7 +52,7 @@ class pause_scr_item(pygame.font.Font):
 
 class snake_block:
 	'Defines the snake'
-	color = (0,250,0)
+	color = (255,255,255)
 	width = 5
 	height = 5
 	x = 0
@@ -63,18 +67,24 @@ class food_block:
 	y = 80
 
 #initializing snake with 200 snake blocks
-snake = [snake_block() for _ in xrange(200)]
+snake=[]
+snake1=[]
 food = food_block()
 
 # initializing for a new game
 def init():
-	global snake, food, eaten, score, FPS, n_blocks, origin
+	global snake, food, eaten, score, FPS, n_blocks, origin, snake1, eaten1, score1, n_blocks1, origin1
 
 	snake = [snake_block() for _ in xrange(200)]
+	
+	snake1 = [snake_block() for _ in xrange(200)]
+	
 	food = food_block()
 
 	n_blocks = 1
+	n_blocks1 = 1
 	score = 0
+	score1 = 0
 
 	origin[0] += n_blocks*5
 
@@ -82,8 +92,20 @@ def init():
 		snake[i].x = origin[0] - (snake[i].width*i)
 		snake[i].y = origin[1]
 
+	origin1[0] += n_blocks1*5
+
+	for i in xrange(n_blocks1):
+		snake1[i].x = origin1[0] - (snake1[i].width*i)
+		snake1[i].y = origin1[1]
+
+	for _ in xrange(200):
+                snake[i].color=(0,250,0)
+                snake1[i].color=(0,0,200)
+
+
 	place_food()
 	eaten = 0
+	eaten1 = 0
 
 	FPS=13.0
 	
@@ -91,11 +113,11 @@ def init():
 # function to randomly place food
 def place_food():
 	food.x = random.randrange(0, scr_width, 5)
-        food.y = random.randrange(0, scr_height, 5)
+        food.y = random.randrange(45, scr_height, 5)
 
 
 # function to move the snake blocks by following the head block
-def follow():
+def follow(snake, n_blocks):
 	prev_x = snake[0].x
 	prev_y = snake[0].y
 
@@ -108,35 +130,35 @@ def follow():
 		prev_y = prey
 
 
-def move_right(cur_dir):
+def move_right(snake,cur_dir,n_blocks):
 	
 	if cur_dir != "LEFT":
-		follow()
+		follow(snake,n_blocks)
 		snake[0].x = (snake[0].x+snake[0].width)%(scr_width+5)
-	else:	move_left(cur_dir)
+	else:	move_left(snake, cur_dir,n_blocks)
 
-def move_left(cur_dir):
+def move_left(snake,cur_dir,n_blocks):
 
         if cur_dir != "RIGHT":
-		follow()
+		follow(snake,n_blocks)
                 snake[0].x = (snake[0].x-snake[0].width+scr_width+5)%(scr_width+5)
-	else:	move_right(cur_dir)
+	else:	move_right(snake, cur_dir,n_blocks)
 
-def move_up(cur_dir):
+def move_up(snake,cur_dir,n_blocks):
 
         if cur_dir != "DOWN":
-		follow()
+		follow(snake,n_blocks)
                 snake[0].y = (snake[0].y-snake[0].height+scr_height+5)%(scr_height+5)
-        else:	move_down(cur_dir)
+        else:	move_down(snake, cur_dir,n_blocks)
 
-def move_down(cur_dir):
+def move_down(snake,cur_dir,n_blocks):
 	
         if cur_dir != "UP":
-		follow()
+		follow(snake,n_blocks)
                 snake[0].y = (snake[0].y+snake[0].height)%(scr_height+5)
-	else:	move_up(cur_dir)
+	else:	move_up(snake, cur_dir,n_blocks)
 
-def game_over():
+def game_over(snake,n_blocks):
 	if n_blocks <=2 :	return
 	for i in xrange(1,n_blocks):
 		if snake[0].x == snake[i].x and snake[0].y == snake[i].y:
@@ -183,28 +205,66 @@ def display_game_over_screen():
 
 		pygame.display.flip()
 
+def score_toolbar():#TODO
+	t_height = 40
+	t_width = scr_width
+
+	font = pygame.font.SysFont(None, t_height/2)
+	score_txt = font.render("S1: %d"%score, True, (255,255,255))
+	
+	score_txt_pos = [10, t_height/2 - score_txt.get_rect().height/2]
+
+	screen.blit(score_txt, score_txt_pos)
+
+        score1_txt = font.render("S2: %d"%score1, True, (255,255,255))
+
+        score1_txt_pos = [t_width-50, t_height/2 - score1_txt.get_rect().height/2]
+
+        screen.blit(score1_txt, score1_txt_pos)
+
+
 
 def draw():
 
-	global eaten, n_blocks, FPS, score
+	global snake, snake1, eaten, n_blocks, FPS, score, eaten1, n_blocks1, score1
 
 	BLACK = [0,0,0]
 
 	screen.fill(BLACK)
+	
+	score_toolbar()
 
 	for i in xrange(n_blocks):
 		pygame.draw.rect(screen,snake[i].color,(((snake[i].x%(scr_width+5)),(snake[i].y%(scr_height+5))),(snake[i].width,snake[i].height)))
-
 	eaten = snake[0].x == food.x and snake[0].y == food.y
 
 	if eaten:
 		place_food()
 		eaten = 0
+		eaten1=0
 		n_blocks += 1
+		#print n_blocks
 		snake[n_blocks-1].x=snake[n_blocks-2].x			# adding new block when food is consumed at the last block position
 		snake[n_blocks-1].y=snake[n_blocks-2].y
 		FPS += 0.5						# increasing speed after every food consumption
 		score += 10
+
+	for i in xrange(n_blocks1):
+                pygame.draw.rect(screen,snake1[i].color,(((snake1[i].x%(scr_width+5)),(snake1[i].y%(scr_height+5))),(snake1[i].width,snake1[i].height)))
+        eaten1 = snake1[0].x == food.x and snake1[0].y == food.y
+
+        if eaten1:
+                place_food()
+                eaten1 = 0
+		eaten=0
+                n_blocks1 += 1
+                #print "s1   "+str(n_blocks1)+"snake  "+str(n_blocks)
+                snake1[n_blocks1-1].x=snake1[n_blocks1-2].x                 # adding new block when food is consumed at the last block position
+                snake1[n_blocks1-1].y=snake1[n_blocks1-2].y
+                FPS += 0.5                                              # increasing speed after every food consumption
+                score1 += 10
+
+ 
 
 	pygame.draw.rect(screen,food.color,((food.x, food.y), (food.width, food.height)))
 
@@ -272,8 +332,17 @@ def run():
 	p_up = 0
 	p_down = 0
 	
+	p1_right = 0
+        p1_left = 0
+        p1_up = 0
+        p1_down = 0
+
+
 	cur_dir = "RIGHT"
 	prev_dir = ""
+
+	cur_dir1 = "RIGHT"
+        prev_dir1 = ""
 
 	main_loop = True
 
@@ -282,7 +351,9 @@ def run():
 	while main_loop:
 
 		draw()
-		game_over()
+		#draw(snake1, eaten1, n_blocks1, score1, FPS)
+		game_over(snake,n_blocks)
+		game_over(snake1,n_blocks1)
 
 		for event in pygame.event.get():
 			if event.type ==pygame.QUIT:
@@ -318,16 +389,54 @@ def run():
 					p_up=0
 					p_left=0
 					p_down=0
+				elif event.key == K_s and cur_dir1 != "UP":
+                                        p1_down=1
+                                        prev_dir1 = cur_dir1
+                                        cur_dir1 = "DOWN"
+                                        p1_left=0
+                                        p1_right=0
+                                        p1_up=0
+                                elif event.key == K_w and cur_dir1 != "DOWN":
+                                        p1_up=1
+                                        prev_dir1 = cur_dir1
+                                        cur_dir1 = "UP"
+                                        p1_down=0
+                                        p1_left=0
+                                        p1_right=0
+                                elif event.key == K_a and cur_dir1 != "RIGHT":
+                                        p1_left=1
+                                        prev_dir1 = cur_dir1
+                                        cur_dir1 = "LEFT"
+                                        p1_right=0
+                                        p1_up=0
+                                        p1_down=0
+                                elif event.key == K_d and cur_dir1 != "LEFT":
+                                        p1_right=1
+                                        prev_dir1 = cur_dir1
+                                        cur_dir1 = "RIGHT"
+                                        p1_up=0
+                                        p1_left=0
+                                        p1_down=0
+
 				elif event.key == K_ESCAPE:
 					pause()
 		if p_left:
-			move_left(prev_dir)
+			move_left(snake, prev_dir,n_blocks)
 		elif p_right:
-			move_right(prev_dir)
+			move_right(snake, prev_dir,n_blocks)
 		elif p_up:
-			move_up(prev_dir)
+			move_up(snake, prev_dir,n_blocks)
 		elif p_down:
-			move_down(prev_dir)
+			move_down(snake, prev_dir,n_blocks)
+
+		if p1_left:
+                        move_left(snake1, prev_dir1,n_blocks1)
+                elif p1_right:
+                        move_right(snake1, prev_dir1,n_blocks1)
+                elif p1_up:
+                        move_up(snake1, prev_dir1,n_blocks1)
+                elif p1_down:
+                        move_down(snake1, prev_dir1,n_blocks1)
 
 
 
