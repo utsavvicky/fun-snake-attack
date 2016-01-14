@@ -1,4 +1,4 @@
-import pygame,random,sys,time
+import pygame,random,sys,os
 from pygame.locals import *
 
 pygame.init()
@@ -50,6 +50,12 @@ class pause_scr_item(pygame.font.Font):
                         return True
                 return False
 
+class Background(pygame.sprite.Sprite):
+        def __init__(self, image_file, location):
+                pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
+                self.image = pygame.image.load(image_file)
+                self.rect = self.image.get_rect()
+                self.rect.left, self.rect.top = location
 
 class snake_block:
 	'Defines the snake'
@@ -307,9 +313,11 @@ def pause():
 
 	loop = True
 
-	items_arr = ['Resume', 'Quit']
+	items_arr = ['Resume', 'New Game', 'Quit']
 
 	items = []
+
+	BackGround = Background("./s.jpg", [0,0])
 
 	for index,item in enumerate(items_arr):
 		menu_item = pause_scr_item(item)
@@ -341,8 +349,15 @@ def pause():
 						if item.text == "Quit":
 							pygame.quit()
 							sys.exit()
+						if item.text == "New Game":
+							pygame.quit()
+							os.system("python main.py")
+							sys.exit()
+							
 
 		screen.fill([0,0,0])
+
+		screen.blit(BackGround.image, BackGround.rect)
 		
 		for item in items:
 			if item.is_mouse_selection(pygame.mouse.get_pos()):
@@ -354,6 +369,8 @@ def pause():
 
 			screen.blit(item.label, item.position)
 				
+
+
 		pygame.display.flip()		
 
 def run(mode):
@@ -383,6 +400,8 @@ def run(mode):
 	while main_loop:
 		
 		draw(mode)
+		
+		pygame.image.save(screen, "s.jpg")
 		
 		if t==-1:
 			game_over(snake,n_blocks,mode)
