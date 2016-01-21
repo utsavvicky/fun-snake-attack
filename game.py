@@ -83,6 +83,10 @@ food = food_block()
 def init():
 	global t, snake, food, eaten, score, FPS, n_blocks, origin, snake1, eaten1, score1, n_blocks1, origin1
 
+	hs = open("hs.txt","w")
+	hs.write("0")
+	hs.close()
+
 	snake = [snake_block() for _ in xrange(200)]
 	
 	snake1 = [snake_block() for _ in xrange(200)]
@@ -165,6 +169,16 @@ def move_down(snake,cur_dir,n_blocks):
 
 def game_over(snake,n_blocks,mode):
 	global t
+
+	hs = open("hs.txt","r")
+        hscore = (int)(hs.read())
+        hs.close()
+
+	if score > hscore:
+		hs = open("hs.txt","w")
+		hs.write((str)(score))
+		hs.close()
+
 	if n_blocks <=2 :	return
 	
 	if mode == "multi":
@@ -183,23 +197,34 @@ def game_over(snake,n_blocks,mode):
 		
 
 def display_game_over_screen(mode):
+
+	global hscore
+
+	hs = open("hs.txt","r")
+	hscore = (int)(hs.read())
+	hs.close()
+
 	gover_font = pygame.font.SysFont(None, 48)
 	other_font = pygame.font.SysFont(None, 40)
 
 	gameover = gover_font.render("Gameover!", True, (255,255,255))
+
+	BackGround = Background("./s.jpg", [0,0])
 	
 	if mode == "multi":
 		scored2 = other_font.render("Score: %d"%score1, True, (0,0,255))
-	        scored2_pos = [(scr_width/2) - (scored2.get_rect().width / 2), (scr_height / 2) + 4]
-	
+	        scored2_pos = [(scr_width/2) - (scored2.get_rect().width / 2), (scr_height / 2) + (scored2.get_rect().height)/2 + 6]
+
 	scored= other_font.render("Score: %d"%score, True,(0,255,0))
 	play_again = other_font.render("Play Again?", True, (255,255,255))
 	quit = other_font.render("Quit", True, (255,255,255))
+	high_score = other_font.render("High Score: %d"%hscore, True, (255,255,255))
 
-	gameover_pos = [(scr_width / 2) - (gameover.get_rect().width / 2), (scr_height / 2) - (2*gameover.get_rect().height)]
-	scored_pos = [(scr_width / 2) - (scored.get_rect().width / 2), (scr_height / 2) - (scored.get_rect().height) + 2]
-	play_again_pos = [(scr_width / 2) - (play_again.get_rect().width / 2), (scr_height / 2) + (play_again.get_rect().height) + 6]
-	quit_pos = [(scr_width / 2) - (quit.get_rect().width / 2), (scr_height / 2) + (2*quit.get_rect().height) + 8]
+	gameover_pos = [(scr_width / 2) - (gameover.get_rect().width / 2), (scr_height / 2) - (5*gameover.get_rect().height)/2]
+	high_score_pos = [(scr_width / 2) - (high_score.get_rect().width / 2), (scr_height/2) - (3*high_score.get_rect().height)/2 + 2]
+	scored_pos = [(scr_width / 2) - (scored.get_rect().width / 2), (scr_height / 2) - (scored.get_rect().height)/2 + 4]
+	play_again_pos = [(scr_width / 2) - (play_again.get_rect().width / 2), (scr_height / 2) + (3*play_again.get_rect().height)/2 + 8]
+	quit_pos = [(scr_width / 2) - (quit.get_rect().width / 2), (scr_height / 2) + (5*quit.get_rect().height)/2 + 10]
 
 	loop = True
 
@@ -220,9 +245,11 @@ def display_game_over_screen(mode):
 		
 		screen.fill((0,0,0))
 
+		screen.blit(BackGround.image, BackGround.rect)
 		screen.blit(gameover, gameover_pos)
-		screen.blit(scored, scored_pos)
-	
+		screen.blit(high_score, high_score_pos)
+		screen.blit(scored, scored_pos)	
+
 		if mode=="multi":
 			screen.blit(scored2, scored2_pos)
 	
