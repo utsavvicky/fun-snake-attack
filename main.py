@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import net
 import os
 import imp
 import sys
@@ -86,8 +87,10 @@ class GameMenu():
 								self.funcs[item.text]()
 							elif item.text == "Single Player Mode":
 								self.funcs[item.text]("single")
-							elif item.text == "Two Player Mode":
+							elif item.text == "Two Player Mode" or item.text == "LAN Mode":
 								self.funcs[item.text]("multi")
+							elif item.text == "CPU Mode":
+								self.funcs[item.text]()
 
 
 	    	            # Redraw the background
@@ -125,10 +128,12 @@ if __name__ == "__main__":
 
    	funcs = { "Single Player Mode" : game.run,
 		"Two Player Mode": game.run,
+		"LAN Mode": net.run,
+		"CPU Mode": game.cpu_player,
 		"Quit" : sys.exit
     	}
 
-   	menu_items = ('Single Player Mode', 'Two Player Mode', 'Quit')
+   	menu_items = ('Single Player Mode', 'Two Player Mode', 'LAN Mode', 'CPU Mode', 'Quit')
  
    	pygame.display.set_caption('Game Menu')
    	

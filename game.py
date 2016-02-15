@@ -122,7 +122,8 @@ def init():
 # function to randomly place food
 def place_food():
 	food.x = random.randrange(0, scr_width, 5)
-        food.y = random.randrange(45, scr_height, 5)
+	food.y = 200
+        #food.y = random.randrange(45, scr_height, 5)
 
 
 # function to move the snake blocks by following the head block
@@ -523,6 +524,130 @@ def run(mode):
                         move_down(snake1, prev_dir1,n_blocks1)
 
 
+#-----------------------------------------------------------------------
+def move_min_horizontal(cur_dir, prev_dir):
+
+	if food.x>snake[0].x:
+		print cur_dir
+		if  (food.x - snake[0].x) < (scr_width - food.x) + snake[0].x and cur_dir!="LEFT":
+			prev_dir = cur_dir
+			cur_dir = "RIGHT"
+			move_right(snake, prev_dir, n_blocks)
+
+		elif cur_dir!="RIGHT":
+			prev_dir = cur_dir
+			cur_dir = "LEFT"
+			move_left(snake, prev_dir, n_blocks)
+
+		else:
+			prev_dir = cur_dir
+			cur_dir="DOWN"
+			move_down(snake, prev_dir, n_blocks)
+
+
+	else:
+		print cur_dir
+		if  (-food.x + snake[0].x) < (scr_width + food.x) - snake[0].x and cur_dir!="RIGHT":
+			prev_dir = cur_dir
+			cur_dir = "LEFT"
+			move_left(snake, prev_dir, n_blocks)
+
+		elif cur_dir!="LEFT":
+			prev_dir = cur_dir
+			cur_dir = "RIGHT"
+			move_right(snake, prev_dir, n_blocks)
+
+		else:
+			prev_dir = cur_dir
+			cur_dir = "DOWN"
+			move_down(snake, prev_dir, n_blocks)
+
+	return [cur_dir, prev_dir]
+
+
+def move_min_vertical(cur_dir, prev_dir):
+	
+	if food.y>snake[0].y:
+		if  (food.y - snake[0].y) < (scr_height - food.y) + snake[0].y and cur_dir!="UP":
+			prev_dir = cur_dir
+			cur_dir = "DOWN"
+			move_down(snake, prev_dir, n_blocks)
+
+		elif cur_dir!="UP" and cur_dir!="DOWN":
+			prev_dir = cur_dir
+			cur_dir = "UP"
+			move_up(snake,prev_dir, n_blocks)
+
+		else:
+			prev_dir = cur_dir
+			cur_dir = "RIGHT"
+			move_right(snake, prev_dir, n_blocks)
+
+
+	else:
+		if  (-food.y + snake[0].y) < (scr_height + food.y) - snake[0].y and cur_dir!="DOWN":
+			prev_dir = cur_dir
+			cur_dir = "UP"
+			move_up(snake,prev_dir, n_blocks)
+
+		elif cur_dir!="UP" and cur_dir!="DOWN":
+			prev_dir = cur_dir
+			cur_dir = "DOWN"
+			move_down(snake, prev_dir, n_blocks)
+
+		else:
+			prev_dir = cur_dir
+			cur_dir = "RIGHT"
+			move_right(snake, prev_dir, n_blocks)
+
+	return [cur_dir, prev_dir]
 
 
 
+def cpu_player():
+	p_right = 0
+	p_left = 0
+	p_up = 0
+	p_down = 0
+
+	cur_dir = ""
+	prev_dir = ""
+
+	global t
+
+	main_loop = True
+
+	init()
+
+	while main_loop:
+		
+		draw("")
+		
+		pygame.image.save(screen, "s.jpg")
+		
+		if t==-1:
+			print cur_dir
+			game_over(snake,n_blocks,"")
+
+		if t > 0:
+			t-=1
+		elif t!=-1:
+			display_game_over_screen("")
+
+
+		for event in pygame.event.get():
+			if event.type ==pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			if event.type == pygame.KEYDOWN:
+				if event.key == K_ESCAPE:
+					pause()
+
+		print food.x, food.y
+		print snake[0].x, snake[0].y
+		print "-----------"
+
+		if food.y == snake[0].y or food.x != snake[0].x:
+			cur_dir, prev_dir = move_min_horizontal(cur_dir, prev_dir)
+		else:
+			cur_dir, prev_dir = move_min_vertical(cur_dir, prev_dir)	
